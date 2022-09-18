@@ -20,8 +20,16 @@ gameRouter.get('', async (request, response) => {
     return response.json(games);
 });
 
-gameRouter.post('', (request, response) => {
-    return response.json([]);
+gameRouter.post('', async (request, response) => {
+    const dataNewGame = request.body;
+    
+    const newGame = await prisma.game.create({
+        data: {
+            title: dataNewGame.title,
+            bannerUrl: dataNewGame.bannerUrl,
+        }
+    })
+    return response.status(201).json(newGame);
 });
 
 export default gameRouter;
