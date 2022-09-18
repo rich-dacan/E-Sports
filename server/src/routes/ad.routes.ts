@@ -7,11 +7,32 @@ const prisma = new PrismaClient({
 })
 
 // Listando anúncios por game
-adsRouter.get('/games/:id/ads', (request, response) => {
-    return response.json([
-      { testando: "teste1" },
-      { testando: "teste2" },
-    ]);
+adsRouter.get('/games/:id/ads', async (request, response) => {
+    const gameIdParam = request.params.id
+    const ads = await prisma.ad.findMany({
+        select: {
+            id: true,
+            name: true,
+            yearsPlaying: true,
+            weekDays: true,
+            hourStart: true,
+            hourEnd: true,
+            useVoiceChannel: true,
+        },
+        where: {
+            gameId: gameIdParam,
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    })
+
+    return response.json(ads.map(ad => {
+        return {
+            ...ad,
+            weekDays: ad.weekDays.split(',')
+        }
+    }));
 });
 
 // Listando discord por anúncio
