@@ -1,9 +1,9 @@
+import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect, useState } from 'react';
 import logoImage from './assets/Logo.svg';
 import CreateAdBanner from './components/CreateAdBanner';
 import GameBanner from "./components/GameBanner";
 import './styles/main.css';
-
 interface GameProps {
     id: string;
     title: string;
@@ -44,9 +44,24 @@ function App() {
             )}
         </div>
 
-        <div className='pt-1 bg-gradientTitle mt-8 self-stretch rounded-lg overflow-hidden'>
+        <Dialog.Root>
             <CreateAdBanner/>
-        </div>
+
+            <Dialog.Portal>
+                <Dialog.Overlay className='bg-black/60 inset-0 fixed'/>
+
+                <Dialog.Content className='fixed bg[#2A2634] py-8 px-10 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg w-[480px]'>
+                    <Dialog.Title>
+                        Publique um anúncio
+                    </Dialog.Title>
+
+                    <Dialog.Content>
+                        teste
+                    </Dialog.Content>
+                </Dialog.Content>
+            </Dialog.Portal>
+        </Dialog.Root>
+        
     </div>
   )
 }
