@@ -1,9 +1,27 @@
+import { useEffect, useState } from 'react';
 import logoImage from './assets/Logo.svg';
 import CreateAdBanner from './components/CreateAdBanner';
 import GameBanner from "./components/GameBanner";
 import './styles/main.css';
 
+interface GameProps {
+    id: string;
+    title: string;
+    bannerUrl: string;
+    _count: {
+        ads: number;
+    }
+}
+
 function App() {
+
+    const [games, setGames] = useState<GameProps[]>([]);
+
+    useEffect(() => {
+        fetch('http://localhost:3001/games')
+            .then(res => res.json())
+            .then(data => setGames(data))
+    }, [])
 
   return (
     <div className='max-w-[1344px] mx-auto flex flex-col items-center my-20'>
@@ -14,11 +32,16 @@ function App() {
         </h1>
         
         <div className='grid grid-cols-6 gap-6'>
-            <GameBanner 
-                bannerUrl="../public/image1.svg"
-                title="League of Legends"   
-                adsCount={7}
-            />
+            
+            {games.map(({ id,  bannerUrl, title, _count }) => 
+
+                <GameBanner 
+                    key={id}
+                    bannerUrl={bannerUrl}
+                    title={title}  
+                    adsCount={_count.ads}
+                />
+            )}
         </div>
 
         <div className='pt-1 bg-gradientTitle mt-8 self-stretch rounded-lg overflow-hidden'>
