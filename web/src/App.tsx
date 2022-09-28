@@ -1,10 +1,14 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import logoImage from './assets/Logo.svg';
 import CreateAdBanner from './components/CreateAdBanner';
 import CreateAdModal from './components/Form/CreateAdModal';
 import GameBanner from "./components/GameBanner";
+import api from './service/api';
 import './styles/main.css';
+
 export interface GameProps {
     id: string;
     title: string;
@@ -19,9 +23,8 @@ function App() {
     const [games, setGames] = useState<GameProps[]>([]);
 
     useEffect(() => {
-      fetch('http://localhost:3001/games')
-        .then(res => res.json())
-        .then(data => setGames(data))
+      api('/games')
+        .then(res => setGames(res.data))
     }, [])
 
   return (
@@ -52,6 +55,8 @@ function App() {
         <CreateAdModal/>
         
       </Dialog.Root>
+
+      <ToastContainer />
     </div>
   )
 }

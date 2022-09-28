@@ -2,9 +2,11 @@ import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Check, GameController } from 'phosphor-react';
+import { toast } from 'react-toastify';
 
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { GameProps } from '../../App';
+import api from '../../service/api';
 import Input from './input';
 
 
@@ -12,14 +14,56 @@ export default function CreateAdModal() {
 
   const [games, setGames] = useState<GameProps[]>([]);
   const [weekDays, setWeekDays] = useState<String[]>([]);
-
-  console.log(weekDays)
+  const [useVoiceChannel, setUseVoiceChannel] = useState<Boolean>(false);
 
   useEffect(() => {
-    fetch('http://localhost:3001/games')
-      .then(res => res.json())
-      .then(data => setGames(data))
+    api('/games')
+      .then(res => setGames(res.data))
   }, [])
+
+  async function handleCreateAdd(e: FormEvent){
+    e.preventDefault()
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData);
+
+    try {
+      await api
+      .post(`/games/${data.game}/ads`, {
+        name: data.name,
+        yearsPlaying: Number(data.yearsPlaying),
+        discord: data.discord,
+        weekDays: weekDays.map(Number),
+        hourStart: data.hourStart,
+        hourEnd: data.hourEnd,
+        useVoiceChannel: useVoiceChannel,
+      })
+      .then((_) => {
+        toast('Anúncio criado com sucesso', {
+          position: toast.POSITION.TOP_CENTER,
+          type: 'success',
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined
+        });
+  
+      })
+    } catch (err) {
+        toast('Erro ao criar anúncio', {
+          position: toast.POSITION.TOP_CENTER,
+          type: 'error',
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined
+        });
+    }
+  }
 
   return (
     <Dialog.Portal>
@@ -30,11 +74,12 @@ export default function CreateAdModal() {
             Publique um anúncio
         </Dialog.Title>
 
-          <form className='mt-8 flex flex-col gap-4'>
+          <form onSubmit={handleCreateAdd} className='mt-8 flex flex-col gap-4'>
             <div className='flex flex-col gap-2'> 
               <label htmlFor="game" className='font-semibold'>Qual o game?</label>
               <select 
                 id="game"   
+                name='game'
                 className='bg-zinc-900 rounded py-3 px-4 text-sm text-zinc-500 placeholder:text-zinc-500'
                 defaultValue='bg-zinc-900'
               >
@@ -52,6 +97,7 @@ export default function CreateAdModal() {
               <label htmlFor="name" className='font-semibold'>Seu nome (ou nickname)</label>
               <Input 
                 id="name"  
+                name='name'
                 placeholder="Como te chamam dentro do game?" 
               />
             </div>
@@ -59,12 +105,12 @@ export default function CreateAdModal() {
             <div className='grid grid-cols-2 gap-6'>
               <div className='flex flex-col gap-2'>
                 <label htmlFor="yearsPlaying" className='font-semibold'>Joga há quantos anos?</label>
-                <Input type="number" id="yearsPlaying" placeholder="Tudo bem ser ZERO" />
+                <Input type="number" id="yearsPlaying" name='yearsPlaying' placeholder="Tudo bem ser ZERO" />
               </div>
 
               <div className='flex flex-col gap-2'>
                 <label htmlFor="discord" className='font-semibold'>Qual seu Discord?</label>
-                <Input id="discord" placeholder="Usuário#0000" />
+                <Input id="discord" name='discord' placeholder="Usuário#0000" />
               </div>
             </div>
 
@@ -131,14 +177,24 @@ export default function CreateAdModal() {
                   <div className='flex-1 flex-col gap-2 '>
                       <label htmlFor="hourStart" className='font-semibold'>Qual horário do dia?</label>
                       <div className='grid grid-cols-2 gap-6'>
-                        <Input id="hourStart" type="time" placeholder='De'/>
-                        <Input id="hourEnd" type="time" placeholder='Até'/>
+                        <Input id="hourStart" name='hourStart' type="time" placeholder='De'/>
+                        <Input id="hourEnd" name='hourEnd' type="time" placeholder='Até'/>
                       </div>
                   </div>
               </div>
 
               <label className='flex gap-2 mt-2 text-sm items-center'>
-                <Checkbox.Root className=' w-6 h-6 p-1 bg-zinc-900'>
+                <Checkbox.Root 
+                  onCheckedChange={() => {
+                    if(useVoiceChannel){
+                      
+                      setUseVoiceChannel(false);
+                    } else {
+                      setUseVoiceChannel(true);
+                    }
+                  }} 
+                  className=' w-6 h-6 p-1 bg-zinc-900'
+                >
                   <Checkbox.Indicator className='text-emerald-400'>
                     <Check size={16}/>
                   </Checkbox.Indicator>
@@ -163,6 +219,7 @@ export default function CreateAdModal() {
               </footer>
           </form>
       </Dialog.Content>
+      {/* <ToastContainer/> */}
     </Dialog.Portal>
   )
 }
