@@ -5,7 +5,7 @@ import CreateAdBanner from './components/CreateAdBanner';
 import CreateAdModal from './components/Form/CreateAdModal';
 import GameBanner from "./components/GameBanner";
 import './styles/main.css';
-interface GameProps {
+export interface GameProps {
     id: string;
     title: string;
     bannerUrl: string;
